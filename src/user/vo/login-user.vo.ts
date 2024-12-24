@@ -1,31 +1,53 @@
-interface UserInfo {
-    id: number;
+/*
+ * @Author: 汪培良 rick_wang@yunquna.com
+ * @Date: 2024-12-24 10:22:30
+ * @LastEditors: 汪培良 rick_wang@yunquna.com
+ * @LastEditTime: 2024-12-24 15:00:37
+ * @FilePath: /meeting_room_booking_system_backend/src/user/vo/login-user.vo.ts
+ * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+ */
+import { ApiProperty } from '@nestjs/swagger';
+class UserInfo {
+  @ApiProperty()
+  id: number;
 
-    username: string;
+  @ApiProperty({ example: 'zhangsan' })
+  username: string;
 
-    nickName: string;
+  @ApiProperty({ example: '张三' })
+  nickName: string;
 
-    email: string;
+  @ApiProperty({ example: 'xx@xx.com' })
+  email: string;
 
-    headPic: string;
+  @ApiProperty({ example: 'xxx.png' })
+  headPic: string;
 
-    phoneNumber: string;
+  @ApiProperty({ example: '13233333333' })
+  phoneNumber: string;
 
-    isFrozen: boolean;
+  @ApiProperty()
+  isFrozen: boolean;
 
-    isAdmin: boolean;
+  @ApiProperty()
+  isAdmin: boolean;
 
-    createTime: number;
+  @ApiProperty()
+  createTime: number;
 
-    roles: string[];
+  @ApiProperty({ example: ['管理员'] })
+  roles: string[];
 
-    permissions: string[]
+  @ApiProperty({ example: 'query_aaa' })
+  permissions: string[];
 }
 export class LoginUserVo {
+  @ApiProperty()
+  userInfo: UserInfo;
 
-    userInfo: UserInfo;
+  @ApiProperty()
+  accessToken: string;
 
-    accessToken: string;
-
-    refreshToken: string;
+  @ApiProperty()
+  refreshToken: string;
 }
