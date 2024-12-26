@@ -13,6 +13,7 @@ import {
   RegisterUserDto,
   LoginUserDto,
   UpdateUserPasswordDto,
+  UpdateUserDto,
 } from './user.dto';
 import { LoginUserVo } from './vo/login-user.vo';
 import { RefreshTokenVo } from './vo/refresh-token.vo';
@@ -28,7 +29,7 @@ import {
   ApiBody,
   ApiBearerAuth,
 } from '@nestjs/swagger';
-import { RequireLogin } from 'src/custom.decorator';
+import { RequireLogin, UserInfo } from 'src/custom.decorator';
 
 @ApiTags('用户管理')
 @Controller('user')
@@ -222,7 +223,7 @@ export class UserController {
   })
   @Get('info')
   @RequireLogin()
-  async info(@Query('userId') userId: number) {
+  async info(@UserInfo('userId') userId: number) {
     const user = await this.userService.findUserDetailById(userId);
     const vo = new UserDetailVo();
     vo.id = user.id;
@@ -239,15 +240,25 @@ export class UserController {
   @ApiBearerAuth()
   @ApiBody({ type: UpdateUserPasswordDto })
   @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: '验证码已失效/不正确',
+  })
+  @ApiResponse({
     status: HttpStatus.OK,
-    description: 'success',
-    type: UserDetailVo,
+    type: String,
+    description: '更新成功',
   })
   @Post(['update_password', 'admin/update_password'])
   @RequireLogin()
-  async updatePassword(@Body() updateUser: UpdateUserPasswordDto) {
-    // const user = await this.userService.updateUser(updateUser);
-    // const vo = new UserDetailVo();
+  async updatePassword(
+    @UserInfo('userId') userId: number,
+    @Body() updateUser: UpdateUserPasswordDto,
+  ) {
+    const res = await this.userService.updatePassword(userId, updateUser);
+
+    this.redisService.del(`update_password_captcha_${updateUser.email}`);
+
+    return res;
   }
 
   @ApiBearerAuth()
@@ -272,5 +283,51 @@ export class UserController {
       html: `<p>HHi,芸仔仔这是你的修改密码验证码： ${code}，记得来玩哟~！！！</p>`,
     });
     return '发送成功';
+  }
+
+  @ApiBearerAuth()
+  @ApiBody({
+    type: UpdateUserDto,
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: '验证码已失效/不正确',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: '更新成功',
+    type: String,
+  })
+  @RequireLogin()
+  @Post(['update', 'admin/update'])
+  async updateUserInfo(
+    @UserInfo('userId') userId: number,
+    @Body() updateUser: UpdateUserDto,
+  ) {
+    const res = await this.userService.updateUserInfo(userId, updateUser);
+    this.redisService.del(`update_password_captcha_${updateUser.email}`);
+    return res;
+  }
+
+  @ApiBearerAuth()
+  @ApiQuery({
+    name: 'id',
+    description: '用户id',
+    type: Number,
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: '验证码已失效/不正确',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: '更新成功',
+    type: String,
+  })
+  @RequireLogin()
+  @Get('freeze')
+  async freeze(@Query('id') userId: number) {
+    await this.userService.freezeUserById(userId);
+    return 'success';
   }
 }
