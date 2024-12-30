@@ -8,7 +8,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { md5 } from 'src/utils';
-import { Repository } from 'typeorm';
+import { Like, Repository } from 'typeorm';
 import {
   RegisterUserDto,
   LoginUserDto,
@@ -20,6 +20,7 @@ import { User } from './entities/user.entities';
 import { Role } from './entities/role.entities';
 import { Permission } from './entities/permission.entities';
 import { LoginUserVo } from './vo/login-user.vo';
+import { UserListVo } from './vo/user-list.vo';
 
 @Injectable()
 export class UserService {
@@ -237,5 +238,48 @@ export class UserService {
     user.isFrozen = true;
 
     await this.userRepository.save(user);
+  }
+
+  async findUsers(
+    username: string,
+    nickName: string,
+    email: string,
+    pageNo: number,
+    pageSize: number,
+  ) {
+    const skipCount = (pageNo - 1) * pageSize;
+
+    const condition: Record<string, any> = {};
+
+    if (username) {
+      condition.username = Like(`%${username}%`);
+    }
+    if (nickName) {
+      condition.nickName = Like(`%${nickName}%`);
+    }
+    if (email) {
+      condition.email = Like(`%${email}%`);
+    }
+
+    const [users, totalCount] = await this.userRepository.findAndCount({
+      select: [
+        'id',
+        'username',
+        'nickName',
+        'email',
+        'phoneNumber',
+        'isFrozen',
+        'headPic',
+        'createTime',
+      ],
+      skip: skipCount,
+      take: pageSize,
+      where: condition,
+    });
+    const vo = new UserListVo();
+    vo.totalCount = totalCount;
+    vo.users = users;
+
+    return vo;
   }
 }
