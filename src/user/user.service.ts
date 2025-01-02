@@ -163,7 +163,7 @@ export class UserService {
     };
   }
 
-  async updatePassword(userId, passwordDto: UpdateUserPasswordDto) {
+  async updatePassword(passwordDto: UpdateUserPasswordDto) {
     const captcha = await this.redisService.get(
       `update_password_captcha_${passwordDto.email}`,
     );
@@ -178,13 +178,17 @@ export class UserService {
 
     const foundUser = await this.userRepository.findOne({
       where: {
-        id: userId,
+        username:passwordDto.username
       },
     });
+    if(!foundUser){
+      throw  new HttpException('用户不存在', HttpStatus.BAD_REQUEST);
+    }
 
-    if (foundUser.email !== passwordDto.email) {
+    if(foundUser.email !== passwordDto.email) {
       throw new HttpException('邮箱不正确', HttpStatus.BAD_REQUEST);
     }
+
 
     foundUser.password = md5(passwordDto.password);
 

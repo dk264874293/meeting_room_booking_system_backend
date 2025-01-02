@@ -237,7 +237,7 @@ export class UserController {
     vo.isFrozen = user.isFrozen;
     return vo;
   }
-  @ApiBearerAuth()
+
   @ApiBody({ type: UpdateUserPasswordDto })
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
@@ -249,24 +249,21 @@ export class UserController {
     description: '更新成功',
   })
   @Post(['update_password', 'admin/update_password'])
-  @RequireLogin()
   async updatePassword(
-    @UserInfo('userId') userId: number,
+  
     @Body() updateUser: UpdateUserPasswordDto,
   ) {
-    const res = await this.userService.updatePassword(userId, updateUser);
+    const res = await this.userService.updatePassword( updateUser);
 
     this.redisService.del(`update_password_captcha_${updateUser.email}`);
 
     return res;
   }
 
-  @ApiBearerAuth()
   @ApiQuery({
     name: 'address',
   })
   @ApiResponse({})
-  @RequireLogin()
   @Get('update_password/captcha')
   async updatePasswordCaptcha(@Query('address') address: string) {
     const code = Math.random().toString().slice(2, 8);
