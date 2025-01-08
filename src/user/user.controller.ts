@@ -7,7 +7,11 @@ import {
   Query,
   UnauthorizedException,
   HttpStatus,
+  UseInterceptors,
+  BadRequestException,
+  UploadedFile,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { UserService } from './user.service';
 import {
   RegisterUserDto,
@@ -30,6 +34,8 @@ import {
   ApiBearerAuth,
 } from '@nestjs/swagger';
 import { RequireLogin, UserInfo } from 'src/custom.decorator';
+import * as path from 'path';
+import { storage } from 'src/my-file-storage';
 
 @ApiTags('用户管理')
 @Controller('user')
@@ -249,11 +255,8 @@ export class UserController {
     description: '更新成功',
   })
   @Post(['update_password', 'admin/update_password'])
-  async updatePassword(
-  
-    @Body() updateUser: UpdateUserPasswordDto,
-  ) {
-    const res = await this.userService.updatePassword( updateUser);
+  async updatePassword(@Body() updateUser: UpdateUserPasswordDto) {
+    const res = await this.userService.updatePassword(updateUser);
 
     this.redisService.del(`update_password_captcha_${updateUser.email}`);
 
@@ -374,5 +377,27 @@ export class UserController {
       pageNo,
       pageSize,
     );
+  }
+  @Post('upload')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      dest: 'uploads',
+      storage: storage,
+      limits: {
+        fileSize: 1024 * 1024 * 3,
+      },
+      fileFilter(req, file, callback) {
+        const extname = path.extname(file.originalname);
+        if (['.png', '.jpg', '.gif', '.jpeg'].includes(extname)) {
+          callback(null, true);
+        } else {
+          callback(new BadRequestException('只能上传图片'), false);
+        }
+      },
+    }),
+  )
+  uploadFile(@UploadedFile() file) {
+    console.log('file', file);
+    return file.path;
   }
 }

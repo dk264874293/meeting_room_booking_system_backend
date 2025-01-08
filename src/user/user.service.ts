@@ -178,17 +178,16 @@ export class UserService {
 
     const foundUser = await this.userRepository.findOne({
       where: {
-        username:passwordDto.username
+        username: passwordDto.username,
       },
     });
-    if(!foundUser){
-      throw  new HttpException('用户不存在', HttpStatus.BAD_REQUEST);
+    if (!foundUser) {
+      throw new HttpException('用户不存在', HttpStatus.BAD_REQUEST);
     }
 
-    if(foundUser.email !== passwordDto.email) {
+    if (foundUser.email !== passwordDto.email) {
       throw new HttpException('邮箱不正确', HttpStatus.BAD_REQUEST);
     }
-
 
     foundUser.password = md5(passwordDto.password);
 
@@ -251,6 +250,7 @@ export class UserService {
     pageNo: number,
     pageSize: number,
   ) {
+    console.log(username, nickName);
     const skipCount = (pageNo - 1) * pageSize;
 
     const condition: Record<string, any> = {};
