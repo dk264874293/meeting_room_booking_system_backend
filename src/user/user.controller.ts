@@ -400,4 +400,29 @@ export class UserController {
     console.log('file', file);
     return file.path;
   }
+
+  @ApiBearerAuth()
+  @ApiResponse({
+    type: String,
+    description: '发送成功',
+  })
+  @RequireLogin()
+  @Get('update/captcha')
+  async updateCaptcha(@UserInfo('email') address: string) {
+    console.log(address);
+    const code = Math.random().toString().slice(2, 8);
+
+    await this.redisService.set(
+      `update_user_captcha_${address}`,
+      code,
+      10 * 60,
+    );
+
+    await this.emailService.sendMail({
+      to: address,
+      subject: '更改用户信息验证码',
+      html: `<p>你的验证码是 ${code}</p>`,
+    });
+    return '发送成功';
+  }
 }
