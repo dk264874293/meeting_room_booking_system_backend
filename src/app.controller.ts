@@ -15,11 +15,11 @@ export class AppController {
   @RequireLogin()
   @RequirePermission('ccc')
   aaaa() {
-      return 'aaa';
+    return 'aaa';
   }
 
   @Get('bbb')
   bbb() {
-      return 'bbb';
+    return 'bbb';
   }
 }

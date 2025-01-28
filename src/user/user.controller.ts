@@ -5,11 +5,11 @@ import {
   Body,
   Inject,
   Query,
-  UnauthorizedException,
   HttpStatus,
   UseInterceptors,
   BadRequestException,
   UploadedFile,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UserService } from './user.service';
@@ -424,5 +424,11 @@ export class UserController {
       html: `<p>你的验证码是 ${code}</p>`,
     });
     return '发送成功';
+  }
+
+  @Get('init-data')
+  async initData() {
+    await this.userService.initData();
+    return 'success';
   }
 }
