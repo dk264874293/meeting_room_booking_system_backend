@@ -10,6 +10,7 @@ import {
   BadRequestException,
   UploadedFile,
   UnauthorizedException,
+  DefaultValuePipe,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UserService } from './user.service';
@@ -36,6 +37,7 @@ import {
 import { RequireLogin, UserInfo } from 'src/custom.decorator';
 import * as path from 'path';
 import { storage } from 'src/my-file-storage';
+import { generateParseIntPipe } from 'src/utils';
 
 @ApiTags('用户管理')
 @Controller('user')
@@ -364,8 +366,14 @@ export class UserController {
   @RequireLogin()
   @Get('list')
   async list(
-    @Query('pageNo') pageNo: number,
-    @Query('pageSize') pageSize: number,
+    @Query('pageNo', new DefaultValuePipe(1), generateParseIntPipe('pageNo'))
+    pageNo: number,
+    @Query(
+      'pageSize',
+      new DefaultValuePipe(10),
+      generateParseIntPipe('pageSize'),
+    )
+    pageSize: number,
     @Query('username') username: string,
     @Query('nickName') nickName: string,
     @Query('email') email: string,
@@ -408,7 +416,7 @@ export class UserController {
   })
   @RequireLogin()
   @Get('update/captcha')
-  async updateCaptcha(@UserInfo('email') address: string) {
+  async updateCaptcha(@Query('address') address: string) {
     console.log(address);
     const code = Math.random().toString().slice(2, 8);
 

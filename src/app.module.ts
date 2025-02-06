@@ -2,7 +2,7 @@
  * @Author: 汪培良 rick_wang@yunquna.com
  * @Date: 2024-12-24 10:22:30
  * @LastEditors: 汪培良 rick_wang@yunquna.com
- * @LastEditTime: 2024-12-24 18:12:05
+ * @LastEditTime: 2025-02-05 13:52:27
  * @FilePath: /meeting_room_booking_system_backend/src/app.module.ts
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -15,6 +15,7 @@ import { UserModule } from './user/user.module';
 import { User } from './user/entities/user.entities';
 import { Role } from './user/entities/role.entities';
 import { MeetingRoom } from './meeting-room/entities/meeting-room.entity';
+import { Booking } from './booking/dto/create-booking.dto';
 import { Permission } from './user/entities/permission.entities';
 import { RedisModule } from './redis/redis.module';
 import { EmailModule } from './email/email.module';
@@ -23,6 +24,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { LoginGuard } from './login.guard';
 import { PermissionGuard } from './permission.guard';
 import { MeetingRoomModule } from './meeting-room/meeting-room.module';
+import { BookingModule } from './booking/booking.module';
 
 @Module({
   imports: [
@@ -53,7 +55,7 @@ import { MeetingRoomModule } from './meeting-room/meeting-room.module';
           database: configService.get('mysql_server_database'),
           synchronize: true,
           logging: true,
-          entities: [User, Role, Permission, MeetingRoom],
+          entities: [User, Role, Permission, MeetingRoom, Booking],
           poolSize: 10,
           connectorPackage: 'mysql2',
           extra: {
@@ -68,6 +70,7 @@ import { MeetingRoomModule } from './meeting-room/meeting-room.module';
     RedisModule,
     EmailModule,
     MeetingRoomModule,
+    BookingModule,
   ],
   controllers: [AppController],
   providers: [
